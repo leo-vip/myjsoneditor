@@ -1,2 +1,0 @@
-# myjsoneditor
-my json editor
