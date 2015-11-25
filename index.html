@@ -1,0 +1,144 @@
+<!DOCTYPE HTML>
+<html style="height: 100%;">
+
+<head style="height: 100%;">
+    <!-- when using the mode "code", it's important to specify charset utf-8 -->
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <link href="css/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <script src="js/jquery-1.11.3.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jsoneditor.min.js"></script>
+    <style type="text/css">
+        .editorcss {
+            /*background-color: #f5f5f5;*/
+        }
+    </style>
+</head>
+
+<body style="height: 100%;">
+
+<nav class="navbar navbar-default" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">Title</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+
+        <form class="navbar-form navbar-right" role="search">
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Title" id="json_title">
+            </div>
+            <button type="submit" class="btn btn-default">Save</button>
+        </form>
+
+    </div>
+    <!-- /.navbar-collapse -->
+</nav>
+
+
+<div class="container-fluid" id="maincontainer" style="height:90%">
+
+    <div id="cEditor" class="editorcss col-xs-5" style="height: 100%;"></div>
+
+    <div class="row" style="height: 100%;">
+        <div style="width:35px ;padding:0px" class="col-xs-1">
+            <div class="btn-group-vertical" style="margin-top:50px">
+                <button type="button" onclick="rightClick();" class="btn btn-warning"><span
+                        class="glyphicon glyphicon-triangle-right" aria-hidden="true"></button>
+                <button type="button" onclick="leftClick();" class="btn btn-danger"><span
+                        class="glyphicon glyphicon-triangle-left" aria-hidden="true"></button>
+            </div>
+            <button type="button" class="btn btn-info" style="margin-top:100px;height:200px;">|||</button>
+        </div>
+
+        <div id="treeEditor" class="editorcss col-xs-5" style="height: 100%;"></div>
+
+        <div class="col-xs-1">
+            <div class="list-group" id="jsonlist">
+                <a href="#" class="list-group-item active" id="jsonlist_title">
+                    Cras justo odio
+                </a>
+                <a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+                <a href="#" class="list-group-item">Morbi leo risus</a>
+                <a href="#" class="list-group-item">Porta ac consectetur ac</a>
+                <a href="#" class="list-group-item">Vestibulum at eros</a>
+                <a href="javascript:addJson()" class="list-group-item"><span class="glyphicon glyphicon-plus"
+                                                                             aria-hidden="true"></span></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+
+</html>
+<script>
+    // create the editor
+    var codeDoc = document.getElementById("cEditor");
+    var codeoptions = {
+
+        "mode": 'code',
+        "search": true
+    };
+
+    // set json
+    var json = {
+        "Array": [1, 2, 3],
+        "Boolean": true,
+        "Null": null,
+        "Number": 123,
+        "Object": {
+            "a": "b",
+            "c": "d"
+        },
+        "String": "Hello World"
+    };
+
+    var codeEditor = new JSONEditor(codeDoc, codeoptions);
+
+
+    codeEditor.set(json);
+
+    var viewoptions = {
+        "mode": "tree",
+        "search": true,
+        modes: ['code', 'form', 'text', 'tree', 'view'],
+        error: function (err) {
+            alert(err.toString());
+        }
+    };
+    var viewDoc = document.getElementById("treeEditor");
+    var viewEditor = new JSONEditor(viewDoc, viewoptions);
+    viewEditor.set(json)
+
+
+    function rightClick() {
+        var json = codeEditor.get()
+        viewEditor.set(json)
+
+    }
+
+    function leftClick() {
+        var json = viewEditor.get()
+        codeEditor.set(json)
+
+    }
+
+    function addJson() {
+        $("#jsonlist_title").after("<a href=\"#\" class=\"list-group-item\">" + $("#json_title").val() + "</a>");
+        $("#json_title").val("Title For New");
+        codeEditor.set();
+        viewEditor.set();
+    }
+
+</script>
