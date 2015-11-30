@@ -996,3 +996,10 @@ div.convert-left {
 .jsoneditor .search input {
     background: 0 0
 }
+
+.openFileList{
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    
+}
