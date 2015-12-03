@@ -1,0 +1,26 @@
+.openFileList{
+    position: fixed;
+    top: 108px;
+    right: 0px;
+    width: 200px;
+
+}
+
+.middle-help{
+    height: 100%;
+    width: 35px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.height-100{
+    height: 100%;
+}
+
+#json_title:focus{
+    background-color: #ffffff;
+}
+
+#json_title{
+    background-color: #f8f8f8;
+}

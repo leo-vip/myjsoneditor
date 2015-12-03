@@ -25,6 +25,9 @@
     <script type="text/javascript" src="chromeapp.js"></script>
     <script type="text/javascript" src="js/jquery-1.11.3.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <!-- <script type="text/javascript" src="js/jsoneditor.min.js"></script>
+    <script type="text/javascript" src="js/main.js"></script> -->
+
 
 </head>
 
@@ -41,8 +44,8 @@
     </div>
 
     <div id="menu">
-        <ul>
-            <li>
+        <ul style="display:none">
+             <li>
                 <a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                     Link with href
                 </a>
@@ -81,6 +84,19 @@
                 <a id="help" title="Open documentation (opens in a new window)" href="doc/index.html" target="_blank">Help</a>
             </li>
         </ul>
+    <ul>
+        <li>
+           <a class="btn btn-primary" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+               <span class="glyphicon glyphicon-folder-open" aria-hidden="true" title="Open the File List"></span>
+           </a>
+       </li>
+        <li>
+
+            <a id="help" title="Open documentation (opens in a new window)" href="doc/index.html" target="_blank">
+                <span class="glyphicon glyphicon-education" aria-hidden="true" title="Open documentation (opens in a new window)"></span>
+            </a>
+        </li>
+    </ul>
     </div>
 
     <!-- TODO: info, links, faq -->

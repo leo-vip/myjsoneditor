@@ -1,7 +1,7 @@
 {
    "app": {
       "launch": {
-         "local_path": "index.html"
+         "local_path": "myindex1.html"
       }
    },
    "description": "JSON Editor is a tool to view, edit, and format JSON. It shows your data in an editable treeview and in a code editor.",
