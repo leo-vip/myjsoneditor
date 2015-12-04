@@ -209,45 +209,40 @@ app.bindingDrag=function(){
 
     var drag=$("#id_drag_button");
 
-
     x = 1;
 
     drag.mousedown(function(e){
         //x = e.clientX - drag[0].offsetWidth - $("#docEditor").width() -20;
         console.debug(x);
         this.setCapture ? (
-            //捕捉焦点
+
             this.setCapture(),
-                //设置事件
+
                 this.onmousemove = function(ev) {
                     mouseMove(ev || event);
                 },
                 this.onmouseup = mouseUp
         ) : (
-            //绑定事件
+
             $(document).bind("mousemove", mouseMove).bind("mouseup", mouseUp)
         );
-        //防止默认事件发生
+
         e.preventDefault();
     })
 
-    //移动事件
+
     function mouseMove(e) {
-        //宇宙超级无敌运算中...
+
         console.debug("MM "+x)
         $("#docEditor").width( e.clientX - x + 'px');
         //$("#treeEditor").width( e.clientX - x + 'px');
     }
-    //停止事件
+
     function mouseUp() {
-        //在支持 releaseCapture 做些东东
         this.releaseCapture ? (
-            //释放焦点
             this.releaseCapture(),
-                //移除事件
                 this.onmousemove = this.onmouseup = null
         ) : (
-            //卸载事件
             $(document).unbind("mousemove", mouseMove).unbind("mouseup", mouseUp)
         );
     }
