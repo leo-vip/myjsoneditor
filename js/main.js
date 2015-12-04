@@ -1,11 +1,17 @@
 var app = {},file ={},util={},count= 1
 var treeEditor=null,docEditor=null
 
-//TODO save ctrl +s | time to save
-//TODO drag the bar
-//TODO save ok. tips
-//TODO click not worked finxed it
+//DONE save ctrl +s | time to save
+//DONE drag the bar
+//DONE save ok. tips
+//DONE click not worked finxed it
+//DONE click to display
+//DONE change title you have to chage the file list display
+//DONE delete json file
 
+var TITLE_SEQ="json.title.seq";
+var CURRENT_JSON_ID="json.current.id"
+var JSON_ID_LIST="json.id.list"
 util.getJsonId=function(){
     var now=new Date()
     var year=now.getFullYear();
@@ -16,6 +22,19 @@ util.getJsonId=function(){
     var second=now.getSeconds();
     return "file."+year+month+date+hour+minute+second+count++;
 
+}
+
+util.getSeq=function(){
+    var seq = parseInt(window.localStorage.getItem(TITLE_SEQ))
+    window.localStorage.setItem(TITLE_SEQ,seq+1)
+    return seq+1
+
+}
+
+util.showTips=function(msg){
+    $("#tips").text(msg)
+    $("#tips").show();
+    $("#tips").fadeOut(3000);
 }
 
 
@@ -35,6 +54,9 @@ app.clickItem= function (){
 
     $("#id_json_list").find("a").removeClass("active");
     $(this).addClass("active");
+
+    var jsonid=$(this).attr("json-id");
+    app.showCurrentJson(jsonid);
 }
 
 /**
@@ -52,29 +74,58 @@ app.loadFileList=function(){
     }
 
     if(!window.localStorage.hasOwnProperty("inited")){
-        file.addAInitJson()
+        file.myJsonEditorInit()
     }
 
-    var ids = window.localStorage.getItem("fileNameList")
-    var idss = ids.split(";")
+    var ids = window.localStorage.getItem(JSON_ID_LIST);
+    var idss = ids.split(";");
     for( index in idss){
-        var id = idss[index]
-        $("#id_json_list").before("<a href=\"#\" class=\"list-group-item list-group-item-info\" json-id="+id+">"+window.localStorage.getItem(id+".title")+"</a>");
+        var id = idss[index];
+         $("<a href=\"#\" class=\"list-group-item \" json-id="+id+">"+window.localStorage.getItem(id+".title")+" <span class=\"badge\" title=\"delete\" json-id="+id+">x</span>  </a>").appendTo($("#id_json_list"));
+
     }
 
-    //load current
-    var cid = window.localStorage.getItem("currentJsonId")
-    $("#json_title").val(window.localStorage.getItem(cid+".title"));
-    docEditor.set(JSON.parse(window.localStorage.getItem(cid+".content")));
+    app.showCurrentJson(window.localStorage.getItem(CURRENT_JSON_ID))
 
+}
+
+//load current and save
+app.showCurrentJson=function(jsonid){
+
+
+    if(window.localStorage.getItem(jsonid+".title")==null){
+        var ids =window.localStorage.getItem(JSON_ID_LIST)
+        if(ids.length==0){
+            file.myJsonEditorInit();
+            util.showTips("Don't delete All , ReInitial the env...")
+            app.loadFileList();
+        }else{
+            jsonid=ids.split(";")[0];
+
+        }
+
+    }
+
+    $("#json_title").val(window.localStorage.getItem(jsonid+".title"));
+    docEditor.set(JSON.parse(window.localStorage.getItem(jsonid+".content")));
+
+    window.localStorage.setItem(CURRENT_JSON_ID,jsonid);//set
 }
 
 app.save=function(){
-    file.save(file.getCurrentid(),$("#json_title").val(),docEditor.get())
+    try{
+        docEditor.get()
+    }catch(e){
+        util.showTips("Your json have errors. pls check..")
+        return ;
+    }
+
+    file.save(file.getCurrentid(),$("#json_title").val(),docEditor.get());
+    util.showTips("saved...");
 }
 
 //init a json
-file.addAInitJson =function (){
+file.myJsonEditorInit =function (){
     // set json
     var json = {
         "Array": [1, 2, 3],
@@ -91,15 +142,17 @@ file.addAInitJson =function (){
     docEditor.set(json)
     var fileid=util.getJsonId()
     window.localStorage.setItem("inited",true);
-    window.localStorage.setItem("currentJsonId",fileid);
-    window.localStorage.setItem("fileNameList",fileid);
+    window.localStorage.setItem(CURRENT_JSON_ID,fileid);
+    window.localStorage.setItem(JSON_ID_LIST,fileid);
+    window.localStorage.setItem(TITLE_SEQ,0);
     file.save(fileid,"test",json)
 }
 
 
 file.addJson=function(id,name,json){
-    var ids =window.localStorage.getItem("fileNameList");
-    window.localStorage.setItem("fileNameList",ids+";"+id);
+    var ids =window.localStorage.getItem(JSON_ID_LIST);
+    window.localStorage.setItem(JSON_ID_LIST,id+";"+ids);
+    window.localStorage.setItem(CURRENT_JSON_ID,id);
     file.save(id,name,json);
 }
 
@@ -111,24 +164,96 @@ file.save=function(id,title,json){
 
 }
 
+file.delete=function(id){
+    //remove id from list
+    var idlist = window.localStorage.getItem(JSON_ID_LIST);
+    var arrIds =idlist.split(";").filter(function(e){if(e==id)return false ; else return true;})
+    window.localStorage.setItem(JSON_ID_LIST,arrIds.join(";"))
+
+    window.localStorage.removeItem(id+".title");
+    window.localStorage.removeItem(id+".content");
+
+
+}
+
 file.getCurrentid=function(){
-    return window.localStorage.getItem("currentJsonId")
+    return window.localStorage.getItem(CURRENT_JSON_ID)
+}
+
+app.deleteJson=function(){
+    var jsonid= $(this).attr("json-id");
+    file.delete(jsonid);
+    $(this).parent().remove();
+    app.showCurrentJson(window.localStorage.getItem(CURRENT_JSON_ID))
+
+
 }
 
 
 app.addJson=function (){
 
     var json_id= util.getJsonId()
-    $("#json_title").val("Title");
+    $("#json_title").val("Title "+util.getSeq());
 
     file.addJson(json_id,$("#json_title").val(),{})
 
-    $("#id_json_list").before("<a href=\"#\" class=\"list-group-item list-group-item-info\" json-id="+json_id+">"+$("#json_title").val()+"</a>");
+    $("<a href=\"#\" class=\"list-group-item list-group-item-info\" json-id="+json_id+">"+$("#json_title").val()+"<span class=\"badge\" title=\"delete\" json-id="+json_id+">x</span> </a>").prependTo($("#id_json_list"));
 
     docEditor.set();
     treeEditor.set();
 
     $("#json_title").focus();
+}
+
+app.bindingDrag=function(){
+
+    var drag=$("#id_drag_button");
+
+
+    x = 1;
+
+    drag.mousedown(function(e){
+        //x = e.clientX - drag[0].offsetWidth - $("#docEditor").width() -20;
+        console.debug(x);
+        this.setCapture ? (
+            //捕捉焦点
+            this.setCapture(),
+                //设置事件
+                this.onmousemove = function(ev) {
+                    mouseMove(ev || event);
+                },
+                this.onmouseup = mouseUp
+        ) : (
+            //绑定事件
+            $(document).bind("mousemove", mouseMove).bind("mouseup", mouseUp)
+        );
+        //防止默认事件发生
+        e.preventDefault();
+    })
+
+    //移动事件
+    function mouseMove(e) {
+        //宇宙超级无敌运算中...
+        console.debug("MM "+x)
+        $("#docEditor").width( e.clientX - x + 'px');
+        //$("#treeEditor").width( e.clientX - x + 'px');
+    }
+    //停止事件
+    function mouseUp() {
+        //在支持 releaseCapture 做些东东
+        this.releaseCapture ? (
+            //释放焦点
+            this.releaseCapture(),
+                //移除事件
+                this.onmousemove = this.onmouseup = null
+        ) : (
+            //卸载事件
+            $(document).unbind("mousemove", mouseMove).unbind("mouseup", mouseUp)
+        );
+    }
+
+
+
 }
 
 
@@ -157,10 +282,24 @@ app.load=function() {
 
     $("#id_to_tree").on("click", app.docToTree);
     $("#id_to_doc").on("click", app.treeToDoc);
-    $("#id_json_btn").on("click", app.addJson);
+    $("#id_json_add_btn").on("click", app.addJson);
     $("#id_json_save").on("click", app.save);
-    app.loadFileList()
+    app.loadFileList();
     $("#id_json_list").on("click", "a", app.clickItem);
+    $("#id_json_list").on("click", "span", app.deleteJson);
+
+    document.onkeydown =  function(e){
+
+        var t = e.which ? e.which : e.keyCode || 0;
+
+        if (e.ctrlKey)switch (t) {
+            case 83:
+                app.save();
+                return false;
+                break;
+        }}
+
+    app.bindingDrag()
 
 
 
