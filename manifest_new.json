@@ -1,0 +1,29 @@
+{
+  "app": {
+    "background": {
+      "scripts": [
+        "background.js"
+      ]
+    }
+  },
+  "description": "my JSON Editor is a tool to view, edit, and format JSON. It shows your data in an editable treeview and in a code editor.",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "manifest_version": 2,
+  "name": "My JSON Editor",
+  "offline_enabled": true,
+  "optional_permissions": [
+    "http://*/",
+    "https://*/"
+  ],
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "clipboardWrite"
+  ],
+  "update_url": "https://clients2.google.com/service/update2/crx",
+  "version": "1.0.0"
+}

@@ -1,6 +1,24 @@
 var app = {},file ={},util={},count= 1
 var treeEditor=null,docEditor=null
 
+//...
+//if (chrome.storage){
+/*if (window.localStorage){
+    var storage=chrome.storage.local;
+    storage.setItem=function(key,value){
+        storage[key]=value;
+    }
+    storage.getItem=function(key){
+        return storage[key];
+    }
+    storage.removeItem=function(key){
+        storage.remove(key)
+    }
+}else{
+    var storage=window.localStorage;
+}*/
+var storage=window.localStorage;
+
 //DONE save ctrl +s | time to save
 //DONE drag the bar
 //DONE save ok. tips
@@ -25,8 +43,8 @@ util.getJsonId=function(){
 }
 
 util.getSeq=function(){
-    var seq = parseInt(window.localStorage.getItem(TITLE_SEQ))
-    window.localStorage.setItem(TITLE_SEQ,seq+1)
+    var seq = parseInt(storage.getItem(TITLE_SEQ))
+    storage.setItem(TITLE_SEQ,seq+1)
     return seq+1
 
 }
@@ -68,24 +86,24 @@ app.clickItem= function (){
  * inited = false|true
  */
 app.loadFileList=function(){
-    if(!window.localStorage){
+    if(!storage){
         alert("your web browse not support localStorage!");
         return;
     }
 
-    if(!window.localStorage.hasOwnProperty("inited")){
+    if(!storage.hasOwnProperty("inited")){
         file.myJsonEditorInit()
     }
 
-    var ids = window.localStorage.getItem(JSON_ID_LIST);
+    var ids = storage.getItem(JSON_ID_LIST);
     var idss = ids.split(";");
     for( index in idss){
         var id = idss[index];
-         $("<a href=\"#\" class=\"list-group-item \" json-id="+id+">"+window.localStorage.getItem(id+".title")+" <span class=\"badge\" title=\"delete\" json-id="+id+">x</span>  </a>").appendTo($("#id_json_list"));
+         $("<a href=\"#\" class=\"list-group-item \" json-id="+id+">"+storage.getItem(id+".title")+" <span class=\"badge\" title=\"delete\" json-id="+id+">x</span>  </a>").appendTo($("#id_json_list"));
 
     }
 
-    app.showCurrentJson(window.localStorage.getItem(CURRENT_JSON_ID))
+    app.showCurrentJson(storage.getItem(CURRENT_JSON_ID))
 
 }
 
@@ -93,8 +111,8 @@ app.loadFileList=function(){
 app.showCurrentJson=function(jsonid){
 
 
-    if(window.localStorage.getItem(jsonid+".title")==null){
-        var ids =window.localStorage.getItem(JSON_ID_LIST)
+    if(storage.getItem(jsonid+".title")==null){
+        var ids =storage.getItem(JSON_ID_LIST)
         if(ids.length==0){
             file.myJsonEditorInit();
             util.showTips("Don't delete All , ReInitial the env...")
@@ -106,10 +124,10 @@ app.showCurrentJson=function(jsonid){
 
     }
 
-    $("#json_title").val(window.localStorage.getItem(jsonid+".title"));
-    docEditor.set(JSON.parse(window.localStorage.getItem(jsonid+".content")));
+    $("#json_title").val(storage.getItem(jsonid+".title"));
+    docEditor.set(JSON.parse(storage.getItem(jsonid+".content")));
 
-    window.localStorage.setItem(CURRENT_JSON_ID,jsonid);//set
+    storage.setItem(CURRENT_JSON_ID,jsonid);//set
 }
 
 app.save=function(){
@@ -141,50 +159,50 @@ file.myJsonEditorInit =function (){
 
     docEditor.set(json)
     var fileid=util.getJsonId()
-    window.localStorage.setItem("inited",true);
-    window.localStorage.setItem(CURRENT_JSON_ID,fileid);
-    window.localStorage.setItem(JSON_ID_LIST,fileid);
-    window.localStorage.setItem(TITLE_SEQ,0);
+    storage.setItem("inited",true);
+    storage.setItem(CURRENT_JSON_ID,fileid);
+    storage.setItem(JSON_ID_LIST,fileid);
+    storage.setItem(TITLE_SEQ,0);
     file.save(fileid,"test",json)
 }
 
 
 file.addJson=function(id,name,json){
-    var ids =window.localStorage.getItem(JSON_ID_LIST);
-    window.localStorage.setItem(JSON_ID_LIST,id+";"+ids);
-    window.localStorage.setItem(CURRENT_JSON_ID,id);
+    var ids =storage.getItem(JSON_ID_LIST);
+    storage.setItem(JSON_ID_LIST,id+";"+ids);
+    storage.setItem(CURRENT_JSON_ID,id);
     file.save(id,name,json);
 }
 
 //to disk
 file.save=function(id,title,json){
 
-    window.localStorage.setItem(id+".title",title);
-    window.localStorage.setItem(id+".content",JSON.stringify(json));
+    storage.setItem(id+".title",title);
+    storage.setItem(id+".content",JSON.stringify(json));
 
 }
 
 file.delete=function(id){
     //remove id from list
-    var idlist = window.localStorage.getItem(JSON_ID_LIST);
+    var idlist = storage.getItem(JSON_ID_LIST);
     var arrIds =idlist.split(";").filter(function(e){if(e==id)return false ; else return true;})
-    window.localStorage.setItem(JSON_ID_LIST,arrIds.join(";"))
+    storage.setItem(JSON_ID_LIST,arrIds.join(";"))
 
-    window.localStorage.removeItem(id+".title");
-    window.localStorage.removeItem(id+".content");
+    storage.removeItem(id+".title");
+    storage.removeItem(id+".content");
 
 
 }
 
 file.getCurrentid=function(){
-    return window.localStorage.getItem(CURRENT_JSON_ID)
+    return storage.getItem(CURRENT_JSON_ID)
 }
 
 app.deleteJson=function(){
     var jsonid= $(this).attr("json-id");
     file.delete(jsonid);
     $(this).parent().remove();
-    app.showCurrentJson(window.localStorage.getItem(CURRENT_JSON_ID))
+    app.showCurrentJson(storage.getItem(CURRENT_JSON_ID))
 
 
 }
@@ -300,4 +318,5 @@ app.load=function() {
 
 }
 
-app.load()
+app.load();
+
