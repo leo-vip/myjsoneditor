@@ -1,4 +1,4 @@
-var app = {},file ={},util={},count= 1
+var app = {},file ={},util={},count= 1,seq=1;
 var treeEditor=null,docEditor=null
 //DONE save ctrl +s | time to save
 //DONE drag the bar
@@ -9,23 +9,24 @@ var treeEditor=null,docEditor=null
 //DONE delete json file
 //TODO changed title ,but the jsonlist is not changed.
 //...
-//if (chrome.storage){
-/*if (window.localStorage){
-    var storage=chrome.storage.local;
-    storage.setItem=function(key,value){
-        storage[key]=value;
+
+var storage=null;
+if (chrome.storage){
+//if (window.localStorage){
+    storage=chrome.storage.local;
+    storage.setItem=function(k,value){
+        var o={};
+        o[k]=value;
+        console.warn("set "+ k +":"+value);
+        storage.set(o,function(){});
     }
-    storage.getItem=function(key){
-        return storage[key];
-    }
+
     storage.removeItem=function(key){
         storage.remove(key)
     }
 }else{
-    var storage=window.localStorage;
-}*/
-var storage=window.localStorage;
-
+    storage=window.localStorage;
+}
 
 
 var TITLE_SEQ="json.title.seq";
@@ -44,16 +45,27 @@ util.getJsonId=function(){
 }
 
 util.getSeq=function(){
-    var seq = parseInt(storage.getItem(TITLE_SEQ))
-    storage.setItem(TITLE_SEQ,seq+1)
-    return seq+1
 
+    return  seq++;
 }
 
 util.showTips=function(msg){
     $("#tips").text(msg)
     $("#tips").show();
     $("#tips").fadeOut(3000);
+}
+
+util.getTitleID= function (id) {
+    return id+".title";
+}
+
+util.subTitleID= function (id_title) {
+    //return id+".title";
+    return id_title.substr(0,id_title.length-".title".length);
+}
+
+util.getContentID= function (id) {
+    return id+".content";
 }
 
 util.substr20= function (str) {
@@ -63,6 +75,8 @@ util.substr20= function (str) {
         return str;
     }
 }
+
+
 
 app.docToTree=function (){
     var json= docEditor.get()
@@ -110,45 +124,75 @@ app.loadFileList=function(){
         return;
     }
 
-    if(!storage.hasOwnProperty("inited")){
-        file.myJsonEditorInit()
-    }
-
-    var ids = storage.getItem(JSON_ID_LIST);
-    var idss = ids.split(";");
-    for( index in idss){
-        var id = idss[index];
-
-        app.addInitASpanHtml2List(id,storage.getItem(id+".title"));
+    //if(!storage.hasOwnProperty("inited")){
+    //    file.myJsonEditorInit()
+    //}
 
 
-    }
+    storage.get(JSON_ID_LIST,function(ids){
 
-    app.showCurrentJson(storage.getItem(CURRENT_JSON_ID))
+        if(typeof(ids[JSON_ID_LIST])=="undefined"){
+            file.myJsonEditorInit();
+        }
+
+        var idss = ids[JSON_ID_LIST].split(";");
+        console.info("idss: "+ids[JSON_ID_LIST]);
+        for( index in idss){
+            var id = idss[index];
+            storage.get(util.getTitleID(id), function (obj) {
+
+                for(var o in obj){
+                    var thisid=util.subTitleID(o);
+                    var thisname=obj[o];
+                    app.addInitASpanHtml2List(thisid,thisname);
+
+                }
+
+
+            })
+
+        }
+    })
+
+    storage.get(CURRENT_JSON_ID,function(id){
+        app.showCurrentJson(id[CURRENT_JSON_ID])
+    })
+
 
 }
 
 //load current and save
 app.showCurrentJson=function(jsonid){
 
+    var jsonid_title=jsonid+".title";
 
-    if(storage.getItem(jsonid+".title")==null){
-        var ids =storage.getItem(JSON_ID_LIST)
-        if(ids.length==0){
-            file.myJsonEditorInit();
-            util.showTips("Don't delete All , ReInitial the env...")
-            app.loadFileList();
+    storage.get(jsonid_title,function(object){
+
+        if(typeof(object[jsonid_title])=="undefined"){
+
+            storage.get(JSON_ID_LIST,function(idslist){
+                //console.debug(idslist);
+                if(typeof(idslist[JSON_ID_LIST])=="undefined" || idslist[JSON_ID_LIST].length==0){
+
+                        util.showTips("You delete All JSON File...");
+
+                    }else{
+                        app.showCurrentJson(idslist[JSON_ID_LIST].split(";")[0]);
+                    }
+            })
+
         }else{
-            jsonid=ids.split(";")[0];
 
+            $("#json_title").val(object[jsonid_title]);
+            storage.get(jsonid+".content",function(object){
+                docEditor.set(JSON.parse(object[jsonid+".content"]));
+            });
+
+            storage.setItem(CURRENT_JSON_ID,jsonid);//set
         }
+    })
 
-    }
 
-    $("#json_title").val(storage.getItem(jsonid+".title"));
-    docEditor.set(JSON.parse(storage.getItem(jsonid+".content")));
-
-    storage.setItem(CURRENT_JSON_ID,jsonid);//set
 }
 
 app.save=function(){
@@ -159,16 +203,23 @@ app.save=function(){
         return ;
     }
 
-    var list= $("#id_json_list").find("a").filter(function(a){return $(this).attr('json-id')==storage.getItem(CURRENT_JSON_ID)});
-    if(list.length==0){
-        util.showTips("Not this Json Doc ,Not find this id .");
-    }
+    storage.get(CURRENT_JSON_ID, function (id) {
+        file.save(id[CURRENT_JSON_ID],$("#json_title").val(),docEditor.get());
+
+        var list= $("#id_json_list").find("a").filter(function(a){return $(this).attr('json-id')==id[CURRENT_JSON_ID]});
+        if(list.length==0){
+            util.showTips("Not this Json Doc ,Not find this id .");
+        }
+
+        var alink=list[0];
+        $(alink).find(".flag").text(util.substr20($("#json_title").val()));
+
+        util.showTips("saved...");
+
+    });
 
 
-    var alink=list[0];
-    $(alink).find(".flag").text(util.substr20($("#json_title").val()));
 
-    util.showTips("saved...");
 }
 
 //init a json
@@ -197,10 +248,14 @@ file.myJsonEditorInit =function (){
 
 
 file.addJson=function(id,name,json){
-    var ids =storage.getItem(JSON_ID_LIST);
-    storage.setItem(JSON_ID_LIST,id+";"+ids);
-    storage.setItem(CURRENT_JSON_ID,id);
-    file.save(id,name,json);
+
+
+    storage.get(JSON_ID_LIST, function (ids) {
+        storage.setItem(JSON_ID_LIST,id+";"+ids[JSON_ID_LIST]);
+        storage.setItem(CURRENT_JSON_ID,id);
+        file.save(id,name,json);
+    })
+
 }
 
 //to disk
@@ -213,25 +268,28 @@ file.save=function(id,title,json){
 
 file.delete=function(id){
     //remove id from list
-    var idlist = storage.getItem(JSON_ID_LIST);
-    var arrIds =idlist.split(";").filter(function(e){if(e==id)return false ; else return true;})
-    storage.setItem(JSON_ID_LIST,arrIds.join(";"))
+    storage.get(JSON_ID_LIST, function (ids) {
 
-    storage.removeItem(id+".title");
-    storage.removeItem(id+".content");
+        var idlist = ids[JSON_ID_LIST];
+        var arrIds =idlist.split(";").filter(function(e){if(e==id)return false ; else return true;})
+        storage.setItem(JSON_ID_LIST,arrIds.join(";"))
 
+        storage.removeItem(id+".title");
+        storage.removeItem(id+".content");
+    })
 
 }
 
-file.getCurrentid=function(){
-    return storage.getItem(CURRENT_JSON_ID)
-}
 
 app.deleteJson=function(){
     var jsonid= $(this).attr("json-id");
     file.delete(jsonid);
     $(this).parent().remove();
-    app.showCurrentJson(storage.getItem(CURRENT_JSON_ID))
+
+
+    storage.get(CURRENT_JSON_ID, function (id) {
+        app.showCurrentJson(id[CURRENT_JSON_ID]);
+    })
 
 
 }
@@ -243,9 +301,9 @@ app.addJson=function (){
     $("#json_title").val("Title "+util.getSeq());
 
     file.addJson(json_id,$("#json_title").val(),{})
-
-    //$("<a href=\"#\" class=\"list-group-item list-group-item-info\" json-id="+json_id+">"+$("#json_title").val()+"<span class=\"badge\" title=\"delete\" json-id="+json_id+">x</span> </a>").prependTo($("#id_json_list"));
     app.addASpanHtml2List(json_id,$("#json_title").val());
+    //
+
     docEditor.set();
     treeEditor.set();
 
