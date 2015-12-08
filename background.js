@@ -11,10 +11,30 @@
 });*/
 
 
-chrome.app.runtime.onLaunched.addListener(function(launchData) {
-  console.debug(launchData);
+// chrome.app.runtime.onLaunched.addListener(function(launchData) {
+//   console.debug(launchData);
+//   chrome.app.window.create('chrome.html', {
+//     state:"maximized"
+//
+//   });
+// });
+
+chrome.app.runtime.onLaunched.addListener(function() {
+  // Center window on screen.
+  var screenWidth = screen.availWidth;
+  var screenHeight = screen.availHeight;
+
+
   chrome.app.window.create('chrome.html', {
-    state:"maximized"
+    "minWidth": 800,
+		"minHeight": 500,
+    frame: 'chrome',
+    innerBounds: {
+        minWidth: 800,
+        minHeight: 600,
+        width: 900,
+        height: 600,
+    }
 
   });
 });
