@@ -1,8 +1,9 @@
 #What's this?
 
-This is a json editor for online web editor(data stored in `window.localStorage`) and chrome plug(data stored in `chrome.storage.local`) 。
+This is a json editor for online web editor(data stored in `window.localStorage`) and chrome plug(data stored in `chrome.storage.local`)
+
 fast.
-#Preview for.
+#Preview
 
 ![chromeapp/images/1.png](chromeapp/images/2all.png)
 news is the data stored on local disk . fast.
@@ -11,16 +12,17 @@ news is the data stored on local disk . fast.
 
 This based [https://github.com/josdejong/jsoneditor](https://github.com/josdejong/jsoneditor)
 
-#For Develop
+#Develop
 
-##for your web
+##Web
 
 Your can reEdit the files:
 `js/main.js`
 `index.html`
 `css/main.css`
 
-##for your chrome plug
+##ChromeApp
+
 You can reEdit the files:
 `js/chrome.js`
 `index.html`
