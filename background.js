@@ -27,7 +27,7 @@ chrome.app.runtime.onLaunched.addListener(function() {
 
   chrome.app.window.create('chrome.html', {
     "minWidth": 800,
-		"minHeight": 500,
+		"minHeight": 600,
     frame: 'chrome',
     innerBounds: {
         minWidth: 800,
