@@ -25,5 +25,6 @@
     "clipboardWrite"
   ],
   "update_url": "https://clients2.google.com/service/update2/crx",
-  "version": "0.0.2.0"
+  "version": "0.0.2.0",
+  "short_name":"JSON"
 }
