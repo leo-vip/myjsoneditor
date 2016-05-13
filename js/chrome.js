@@ -107,7 +107,7 @@ app.addInitASpanHtml2List= function (id, title) {
 //add
 app.addASpanHtml2List= function (id, title) {
 
-    $("<a href=\"#\" class=\"list-group-item list-group-item-danger\" json-id="+id+"><span class='flag' title="+title+">"+util.substr20(title)+"</span><span class=\"badge\" title=\"delete\" json-id="+id+">x</span> </a>").prependTo($("#id_json_list"));
+    $("<a href=\"#\" class=\"list-group-item list-group-item-success\" json-id="+id+"><span class='flag' title="+title+">"+util.substr20(title)+"</span><span class=\"badge\" title=\"delete\" json-id="+id+">x</span> </a>").prependTo($("#id_json_list"));
 }
 
 /**
@@ -314,11 +314,10 @@ app.bindingDrag=function(){
 
     var drag=$("#id_drag_button");
 
-    x = 1;
+    x = 0;
 
     drag.mousedown(function(e){
-        //x = e.clientX - drag[0].offsetWidth - $("#docEditor").width() -20;
-        console.debug(x);
+
         this.setCapture ? (
 
             this.setCapture(),
@@ -337,10 +336,10 @@ app.bindingDrag=function(){
 
 
     function mouseMove(e) {
+        x = e.clientX - drag[0].offsetWidth - $("#docEditor").width() ;
 
-        console.debug("MM "+x)
-        $("#docEditor").width( e.clientX - x + 'px');
-        //$("#treeEditor").width( e.clientX - x + 'px');
+        $("#docEditor").width( $("#docEditor").width() + x + 'px');
+        $("#treeEditor").width( $("#treeEditor").width() - x + 'px');
     }
 
     function mouseUp() {
@@ -351,8 +350,6 @@ app.bindingDrag=function(){
             $(document).unbind("mousemove", mouseMove).unbind("mouseup", mouseUp)
         );
     }
-
-
 
 }
 
